@@ -1,10 +1,9 @@
 // FileUpload.jsx
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, Button, Input, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { setFile, clearFile } from '../../redux/slices/fileSlice';
+import { setFile } from '../../redux/slices/fileSlice';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
@@ -17,6 +16,7 @@ const Background = styled(Box)({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
+  padding: '2rem',
 });
 
 const UploadContainer = styled(Paper)({
@@ -57,8 +57,8 @@ const FileUpload = () => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const fileContent = e.target.result;
-        const key = CryptoJS.enc.Hex.parse('0123456789abcdef0123456789abcdef'); // Replace with your key
-        const iv = CryptoJS.enc.Hex.parse('abcdef9876543210abcdef9876543210'); // Replace with your IV
+        const key = CryptoJS.enc.Hex.parse('0123456789abcdef0123456789abcdef');
+        const iv = CryptoJS.enc.Hex.parse('abcdef9876543210abcdef9876543210');
         const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(fileContent), key, { iv: iv, padding: CryptoJS.pad.Pkcs7 });
         const encryptedContent = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
 
@@ -88,25 +88,31 @@ const FileUpload = () => {
 
   return (
     <Background>
-      <UploadContainer elevation={3}>
-        <CloudUploadIcon style={{ fontSize: 50, color: '#3f51b5' }} />
-        <Typography variant="h5" align="center" gutterBottom>
-          Upload Your File
+    <UploadContainer elevation={3}>
+      <CloudUploadIcon style={{ fontSize: 50, color: '#3f51b5' }} />
+      <Typography variant="h5" align="center" gutterBottom>
+        Upload Your File
+      </Typography>
+      <Input type="file" onChange={handleFileChange} />
+      <Button variant="contained" color="primary" onClick={handleFileUpload} sx={{ mt: 2 }}>
+        Upload
+      </Button>
+      {file && (
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+          Selected file: {file.name}
         </Typography>
-        <Input type="file" onChange={handleFileChange} />
-        <Button variant="contained" color="primary" onClick={handleFileUpload}>
-          Upload
+      )}
+      <Button variant="contained" color="secondary" onClick={() => navigate('/files')} sx={{ mt: 2 }}>
+        View Uploaded Files
+      </Button>
+      <Button variant="contained" color="secondary" onClick={() => navigate('/register')} sx={{ mt: 2 }}>
+          Register User
         </Button>
-        {file && (
-          <Typography variant="body2" color="textSecondary">
-            Selected file: {file.name}
-          </Typography>
-        )}
-        <Button variant="contained" color="secondary" onClick={() => navigate('/files')}>
-          View Uploaded Files
-        </Button>
-      </UploadContainer>
-    </Background>
+        <Button variant="contained" color="secondary" onClick={() => navigate('/listUsers')} sx={{ mt: 2 }}>
+          View Users
+          </Button>
+    </UploadContainer>
+  </Background>
   );
 };
 
