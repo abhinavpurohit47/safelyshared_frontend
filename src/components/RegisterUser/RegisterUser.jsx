@@ -55,6 +55,9 @@ const RegisterUser = () => {
           },
         }
       );
+      if(response.status === 201 || response.status === 200) {
+        navigate('/dashboard');
+      }
       console.log('User registered:', response.data);
     } catch (error) {
       console.error('Error registering user:', error.response.data);

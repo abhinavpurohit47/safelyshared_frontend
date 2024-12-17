@@ -1,8 +1,13 @@
-# React + Vite
+# Safely Shared
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Safely Shared is a React project using Vite for development and build processes. It includes various components, Redux for state management, and MUI for styling.
 
-Currently, two official plugins are available:
+## Description
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This project is designed to manage user authentication, file uploads, and user management. It uses `react-router-dom` for routing between different pages.
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/abhinavpurohit47/safelyshared_frontend.git

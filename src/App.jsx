@@ -27,8 +27,7 @@ function App() {
         }}
       >
       <Routes>
-        <Route path="/" />
-      <Route path="/login" element={<LoginUser />} />
+      <Route path="/" element={<LoginUser />} />
       <Route path="/dashboard" element={<LoadingPage />} />
       <Route path="/upload" element={<FileUpload />} />
         <Route path="/files" element={<FileList />} />
