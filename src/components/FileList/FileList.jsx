@@ -16,7 +16,8 @@ import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { decryptFileContent, fetchEncryptionKey } from '../../encryption';
+import CryptoJS from 'crypto-js';
+
 const lightTheme = createTheme({
   palette: {
     mode: 'light',
@@ -62,42 +63,42 @@ const FileList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchKeyAndFiles = async () => {
-      await fetchEncryptionKey();
-      const fetchFiles = async () => {
-        try {
-          const response = await axios.get('http://localhost:8000/api/files/');
-          if (Array.isArray(response.data)) {
-            setFiles(response.data);
-          } else {
-            console.error('API response is not an array:', response.data);
-          }
-        } catch (error) {
-          console.error('Error fetching files:', error);
-        } finally {
-          setLoading(false);
+    const fetchFiles = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('http://localhost:8000/api/files/');
+        if (Array.isArray(response.data)) {
+          setFiles(response.data);
+        } else {
+          console.error('API response is not an array:', response.data);
         }
-      };
-      fetchFiles();
+      } catch (error) {
+        console.error('Error fetching files:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchKeyAndFiles();
+    fetchFiles();
   }, []);
 
-const handleDownload = async (fileId) => {
+  const handleDownload = async (fileId) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/download/${fileId}/`, {
-        responseType: 'json',
+      const response = await axios.get(`http://localhost:8000/api/download/${fileId}/`, 
+        // {
+        // responseType: 'json',
+    //   });
+      );
 
-      });
-  
       const { iv, encrypted_content, file_name } = response.data;
-  
-      await fetchEncryptionKey(); // Ensure the key is loaded
-      const decryptedContent = decryptFileContent(encrypted_content, iv);
-  
+
+      const decryptedContent = CryptoJS.AES.decrypt(
+        CryptoJS.enc.Hex.parse(encrypted_content),
+        CryptoJS.enc.Hex.parse(iv)
+      ).toString(CryptoJS.enc.Utf8);
+
       const blob = new Blob([decryptedContent], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
-  
+
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', file_name);
@@ -108,7 +109,6 @@ const handleDownload = async (fileId) => {
       console.error('Error downloading file:', error);
     }
   };
-  
 
   const handleDelete = async (fileId) => {
     try {
@@ -204,7 +204,7 @@ const handleDownload = async (fileId) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 fullWidth
               >
                 Go Back

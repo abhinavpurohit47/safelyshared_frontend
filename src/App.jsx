@@ -8,6 +8,7 @@ import UpdateUser from './components/UpdateUser/UpdateUser';
 import ListUsers from './components/ListUsers/ListUsers';
 import LoadingPage from './components/LoadingPage/LoadingPage';
 import { useState } from 'react';
+import LoginUser from './components/LoginUser/LoginUser';
 function App() {
   // eslint-disable-next-line no-unused-vars
   const [darkMode, setDarkMode] = useState(false);
@@ -26,7 +27,9 @@ function App() {
         }}
       >
       <Routes>
-      <Route path="/" element={<LoadingPage />} />
+        <Route path="/" />
+      <Route path="/login" element={<LoginUser />} />
+      <Route path="/dashboard" element={<LoadingPage />} />
       <Route path="/upload" element={<FileUpload />} />
         <Route path="/files" element={<FileList />} />
         <Route path="/register" element={<Register />} />

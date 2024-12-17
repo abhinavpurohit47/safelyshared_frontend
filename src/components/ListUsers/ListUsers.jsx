@@ -81,7 +81,7 @@ const ListUsers = () => {
           </Table>
         </TableContainer>
       </ListContainer>
-      <Button onClick={() => navigate('/')}>Go Back</Button>
+      <Button onClick={() => navigate('/dashboard')}>Go Back</Button>
     </Background>
   );
 };

@@ -178,7 +178,7 @@ const RegisterUser = () => {
                 </Button>
               </Grid>
               <Grid item xs={12}>
-                <Button onClick={() => navigate('/')} variant="text" color="primary" fullWidth>
+                <Button onClick={() => navigate('/dashboard')} variant="text" color="primary" fullWidth>
                   Back to Home
                 </Button>
               </Grid>
