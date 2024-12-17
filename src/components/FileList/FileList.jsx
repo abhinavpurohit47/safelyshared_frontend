@@ -1,28 +1,48 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, List, ListItem, ListItemText, Button, Paper, Grid } from '@mui/material';
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Paper,
+  Grid,
+  CircularProgress,
+  CssBaseline
+} from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { decryptFileContent, fetchEncryptionKey } from '../../encryption';
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#00796b',
+    },
+    background: {
+      default: '#f0f4f8',
+    },
+    text: {
+      primary: '#1a1a1a',
+    },
+  },
+});
 
-const Background = styled(Box)({
-  background: 'url(https://source.unsplash.com/random)',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
+const Background = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
   minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '2rem',
-});
+  padding: '20px',
+}));
 
-const ListContainer = styled(Paper)({
-  padding: '2rem',
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-  borderRadius: '8px',
+const ListContainer = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  margin: '0 auto',
   maxWidth: '800px',
-  width: '100%',
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-});
+}));
 
 const getCSRFToken = () => {
   const name = 'csrftoken';
@@ -38,43 +58,49 @@ const getCSRFToken = () => {
 
 const FileList = () => {
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/files/');
-        if (Array.isArray(response.data)) {
-          setFiles(response.data);
-        } else {
-          console.error('API response is not an array:', response.data);
+    const fetchKeyAndFiles = async () => {
+      await fetchEncryptionKey();
+      const fetchFiles = async () => {
+        try {
+          const response = await axios.get('http://localhost:8000/api/files/');
+          if (Array.isArray(response.data)) {
+            setFiles(response.data);
+          } else {
+            console.error('API response is not an array:', response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching files:', error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching files:', error);
-      }
+      };
+      fetchFiles();
     };
-
-    fetchFiles();
+    fetchKeyAndFiles();
   }, []);
 
-  const handleDownload = async (fileId) => {
+const handleDownload = async (fileId) => {
     try {
       const response = await axios.get(`http://localhost:8000/api/download/${fileId}/`, {
-        responseType: 'blob',
+        responseType: 'json',
+
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+  
+      const { iv, encrypted_content, file_name } = response.data;
+  
+      await fetchEncryptionKey(); // Ensure the key is loaded
+      const decryptedContent = decryptFileContent(encrypted_content, iv);
+  
+      const blob = new Blob([decryptedContent], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+  
       const link = document.createElement('a');
       link.href = url;
-
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = 'downloaded_file';
-      if (contentDisposition && contentDisposition.includes('filename=')) {
-        filename = contentDisposition.split('filename=')[1].split(';')[0].replace(/"/g, '');
-      } else if (response.headers['x-file-name']) {
-        filename = response.headers['x-file-name'];
-      }
-
-      link.setAttribute('download', filename);
+      link.setAttribute('download', file_name);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -82,6 +108,7 @@ const FileList = () => {
       console.error('Error downloading file:', error);
     }
   };
+  
 
   const handleDelete = async (fileId) => {
     try {
@@ -92,7 +119,7 @@ const FileList = () => {
         },
         withCredentials: true,
       });
-      setFiles(files.filter(file => file.id !== fileId));
+      setFiles(files.filter((file) => file.id !== fileId));
     } catch (error) {
       console.error('Error deleting file:', error);
     }
@@ -110,42 +137,83 @@ const FileList = () => {
   };
 
   return (
-    <Background>
-      <ListContainer>
-        <Typography variant="h4" align="center" gutterBottom>
-          Uploaded Files
-        </Typography>
-        <List>
-          {files.map((file) => (
-            <ListItem key={file.id} sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
-              <ListItemText primary={file.file_name} secondary={new Date(file.uploaded_at).toLocaleString()} />
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item>
-                  <Button variant="contained" color="primary" onClick={() => handleDownload(file.id)}>
-                    Download
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button variant="contained" color="secondary" onClick={() => handleGenerateDownloadLink(file.id)}>
-                    Generate Download Link
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button variant="contained" color="error" onClick={() => handleDelete(file.id)}>
-                    Delete
-                  </Button>
-                </Grid>
-              </Grid>
-            </ListItem>
-          ))}
-        </List>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-          <Button variant="contained" color="secondary" onClick={() => navigate('/')}>
-            Go Back
-          </Button>
-        </Box>
-      </ListContainer>
-    </Background>
+    <ThemeProvider theme={lightTheme}>
+      <Background>
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ListContainer>
+            <Typography variant="h4" align="center" gutterBottom>
+              Uploaded Files
+            </Typography>
+            {loading ? (
+              <Box display="flex" justifyContent="center" mt={3}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <List>
+                {files.map((file) => (
+                  <ListItem
+                    key={file.id}
+                    sx={{ flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}
+                  >
+                    <ListItemText
+                      primary={file.file_name}
+                      secondary={new Date(file.uploaded_at).toLocaleString()}
+                    />
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleDownload(file.id)}
+                          fullWidth
+                        >
+                          Download
+                        </Button>
+                        <CssBaseline />
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleGenerateDownloadLink(file.id)}
+                          fullWidth
+                        >
+                          Generate Download Link
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleDelete(file.id)}
+                          fullWidth
+                        >
+                          Delete
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate('/')}
+                fullWidth
+              >
+                Go Back
+              </Button>
+            </Box>
+          </ListContainer>
+        </motion.div>
+      </Background>
+    </ThemeProvider>
   );
 };
 

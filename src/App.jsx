@@ -6,8 +6,11 @@ import { Box } from '@mui/material';
 import Register from './components/RegisterUser/RegisterUser';
 import UpdateUser from './components/UpdateUser/UpdateUser';
 import ListUsers from './components/ListUsers/ListUsers';
+import LoadingPage from './components/LoadingPage/LoadingPage';
+import { useState } from 'react';
 function App() {
-
+  // eslint-disable-next-line no-unused-vars
+  const [darkMode, setDarkMode] = useState(false);
   return (
     <>
 
@@ -17,12 +20,14 @@ function App() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          width: '100%',
           minHeight: '100vh',
-          background: 'url(https://source.unsplash.com/random) no-repeat center center/cover',
+          background: darkMode ? '#121212' : '#f5f5f5',
         }}
       >
       <Routes>
-        <Route path="/" element={<FileUpload />} />
+      <Route path="/" element={<LoadingPage />} />
+      <Route path="/upload" element={<FileUpload />} />
         <Route path="/files" element={<FileList />} />
         <Route path="/register" element={<Register />} />
         <Route path='/updateUser' element={<UpdateUser />} />

@@ -1,25 +1,22 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Box, Button, TextField, Typography, Paper, MenuItem } from '@mui/material';
-import { styled } from '@mui/system';
-import {useNavigate} from 'react-router-dom';
-const Background = styled(Box)({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '100vh',
-  padding: '2rem',
-  background: 'url(https://source.unsplash.com/random) no-repeat center center/cover',
-});
+import { TextField, Button, Typography, Grid, Box, CssBaseline, MenuItem, Link } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
-const RegisterContainer = styled(Paper)({
-  padding: '2rem',
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-  borderRadius: '8px',
-  maxWidth: '400px',
-  width: '100%',
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  textAlign: 'center',
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#00796b',
+    },
+    background: {
+      default: '#f0f4f8',
+    },
+    text: {
+      primary: '#1a1a1a',
+    },
+  },
 });
 
 const getCSRFToken = () => {
@@ -42,19 +39,14 @@ const RegisterUser = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('guest');
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Username:', username);
-    console.log('Password1:', password1);
-    console.log('Password2:', password2);
-    console.log('First Name:', firstName);
-    console.log('Last Name:', lastName);
-    console.log('Email:', email);
-    console.log('Role:', role);
     const csrfToken = getCSRFToken();
     try {
-      const response = await axios.post('http://localhost:8000/users/register/', 
+      const response = await axios.post(
+        'http://localhost:8000/users/register/',
         { username, password1, password2, first_name: firstName, last_name: lastName, email, role },
         {
           headers: {
@@ -70,76 +62,136 @@ const RegisterUser = () => {
   };
 
   return (
-    <Background>
-      <RegisterContainer elevation={3}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Register
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password1}
-            onChange={(e) => setPassword1(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Confirm Password"
-            type="password"
-            value={password2}
-            onChange={(e) => setPassword2(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Role"
-            select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            fullWidth
-            required
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Grid
+        container
+        component="main"
+        sx={{
+          height: '100vh',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: `linear-gradient(
+            rgba(0, 0, 0, 0.5),
+            rgba(0, 0, 0, 0.5)
+          ), no-repeat center center/cover`,
+        }}
+      >
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '800px',
+            textAlign: 'center',
+            px: 3,
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            borderRadius: 2,
+            boxShadow: 3,
+            py: 4,
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              mb: 4,
+              color: theme.palette.primary.main,
+            }}
           >
-            <MenuItem value="admin">Admin</MenuItem>
-            <MenuItem value="regular">Regular User</MenuItem>
-            <MenuItem value="guest">Guest</MenuItem>
-          </TextField>
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Register
-          </Button>
-        </form>
-      </RegisterContainer>
-      <Button onClick={() => navigate('/')}>GO Back</Button>
-    </Background>
+            Register User
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Username"
+                  fullWidth
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  value={password1}
+                  onChange={(e) => setPassword1(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="First Name"
+                  fullWidth
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Last Name"
+                  fullWidth
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  fullWidth
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Role"
+                  fullWidth
+                  select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                >
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="regular">Regular User</MenuItem>
+                  <MenuItem value="guest">Guest</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                  Register
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button onClick={() => navigate('/')} variant="text" color="primary" fullWidth>
+                  Back to Home
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Link href="#" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </Box>
+      </Grid>
+    </ThemeProvider>
   );
 };
 

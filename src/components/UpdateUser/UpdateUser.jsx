@@ -3,9 +3,8 @@ import axios from 'axios';
 import { Box, Button, TextField, Typography, MenuItem, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { motion } from 'framer-motion';
 const Background = styled(Box)({
-  backgroundImage: 'url(https://source.unsplash.com/random)',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   height: '100vh',
@@ -39,12 +38,13 @@ const getCSRFToken = () => {
 
 const UpdateUser = () => {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [role, setRole] = useState('guest');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -75,6 +75,7 @@ const UpdateUser = () => {
         }
       );
       console.log('User updated:', response.data);
+      navigate('/list');
     } catch (error) {
       console.error('Error updating user:', error);
     }
@@ -82,6 +83,11 @@ const UpdateUser = () => {
 
   return (
     <Background>
+         <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
       <UpdateContainer elevation={3}>
         <Typography variant="h5" align="center" gutterBottom>
           Update User
@@ -133,7 +139,7 @@ const UpdateUser = () => {
           </Button>
         </form>
       </UpdateContainer>
-      <Button onClick={() => navigate('/')}>Go Back</Button>
+      </motion.div>
     </Background>
   );
 };
